@@ -18,14 +18,18 @@ package containerinspector
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/containerd/nerdctl/pkg/inspecttypes/native"
 
 	"github.com/containernetworking/plugins/pkg/ns"
 )
+
+const interfacePath = "/var/lib/cni/results/bridge-default-"
 
 func InspectNetNS(ctx context.Context, pid int) (*native.NetNS, error) {
 	nsPath := fmt.Sprintf("/proc/%d/ns/net", pid)
@@ -59,6 +63,48 @@ func InspectNetNS(ctx context.Context, pid int) (*native.NetNS, error) {
 	}
 	if err := ns.WithNetNSPath(nsPath, fn); err != nil {
 		return nil, err
+	}
+	return res, nil
+}
+
+func InspectNetNSWithCNIConfig(ctx context.Context, containerId string) (*native.NetNS, error) {
+	res := &native.NetNS{}
+	bytes, err := os.ReadFile(interfacePath + containerId + "-eth0")
+	if err != nil {
+		return res, err
+	}
+	var cniConfig cniconfig
+	json.Unmarshal(bytes, &cniConfig)
+	res.Interfaces = make([]native.NetInterface, 2)
+	res.PrimaryInterface = cniConfig.Result.Ips[0].Interface
+	res.Interfaces[0] = native.NetInterface{
+		Interface: net.Interface{
+			Index: 1,
+			MTU:   65536,
+			Name:  "lo",
+			Flags: 0x0000101,
+		},
+		HardwareAddr: "",
+		Flags:        []string{"up", "loopback"},
+		Addrs:        []string{"127.0.0.1/8", "::1/128"},
+	}
+	var primaryInterfaceMac string
+	for _, f := range cniConfig.Result.Interfaces {
+		if f.Name == cniConfig.IfName {
+			primaryInterfaceMac = f.Mac
+			break
+		}
+	}
+	res.Interfaces[1] = native.NetInterface{
+		Interface: net.Interface{
+			Index: cniConfig.Result.Ips[0].Interface,
+			MTU:   1500,
+			Name:  cniConfig.IfName,
+			Flags: 0x00010011,
+		},
+		HardwareAddr: primaryInterfaceMac,
+		Flags:        []string{"up", "broadcast", "multicast"},
+		Addrs:        []string{cniConfig.Result.Ips[0].Address},
 	}
 	return res, nil
 }

@@ -18,7 +18,6 @@ require (
 	github.com/containerd/stargz-snapshotter/ipfs v0.12.0
 	github.com/containerd/typeurl v1.0.3-0.20220422153119-7f6e6d160d67
 	github.com/containernetworking/cni v1.1.2
-	github.com/containernetworking/plugins v1.1.1
 	github.com/coreos/go-systemd/v22 v22.4.0
 	github.com/cyphar/filepath-securejoin v0.2.3
 	github.com/docker/cli v20.10.18+incompatible
@@ -179,6 +178,8 @@ require (
 	lukechampine.com/blake3 v1.1.6 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+require github.com/containernetworking/plugins v1.1.1
 
 replace (
 	// containerd main
