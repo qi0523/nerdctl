@@ -82,10 +82,14 @@ func GetExistingImage(ctx context.Context, client *containerd.Client, snapshotte
 				Snapshotter: snapshotter,
 				Remote:      getSnapshotterOpts(snapshotter).isRemote(),
 			}
+			start := time.Now()
 			if unpacked, err := image.IsUnpacked(ctx, snapshotter); err == nil && !unpacked {
 				if err := image.Unpack(ctx, snapshotter); err != nil {
 					return err
 				}
+				fmt.Println("unpack_elapse:", time.Since(start))
+			} else {
+				fmt.Println("unpack_elapse: 0s")
 			}
 			return nil
 		},
