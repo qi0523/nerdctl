@@ -29,6 +29,7 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/mount"
 	"github.com/containerd/containerd/oci"
+	"github.com/containerd/containerd/snapshots"
 	"github.com/containerd/continuity/fs"
 	"github.com/containerd/nerdctl/pkg/idgen"
 	"github.com/containerd/nerdctl/pkg/imgutil"
@@ -165,8 +166,18 @@ func generateMountOpts(cmd *cobra.Command, ctx context.Context, client *containe
 		// When the Unmount fails, RemoveAll will incorrectly delete data from the mounted dir
 		defer os.Remove(tempDir)
 
+		// p2p-policy 
+		policy, err := cmd.Flags().GetString("p2p-policy")
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		op := snapshots.WithLabels(map[string]string{
+			"p2p-policy": policy,
+		})
+
 		var mounts []mount.Mount
-		mounts, err = s.View(ctx, tempDir, chainID)
+		mounts, err = s.View(ctx, tempDir, chainID, op)
 		if err != nil {
 			return nil, nil, nil, err
 		}

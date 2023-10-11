@@ -97,6 +97,8 @@ func setCreateFlags(cmd *cobra.Command) {
 	// No "-h" alias for "--help", because "-h" for "--hostname".
 	cmd.Flags().Bool("help", false, "show help")
 
+	cmd.Flags().String("p2p-policy", "", "p2p-policy @@#~~#0|1|2")
+
 	cmd.Flags().BoolP("tty", "t", false, "(Currently -t needs to correspond to -i)")
 	cmd.Flags().BoolP("interactive", "i", false, "Keep STDIN open even if not attached")
 	cmd.Flags().String("restart", "no", `Restart policy to apply when a container exits (implemented values: "no"|"always")`)
