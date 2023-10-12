@@ -172,7 +172,7 @@ func generateMountOpts(cmd *cobra.Command, ctx context.Context, client *containe
 		}
 
 		var mounts []mount.Mount
-		mounts, err = s.View(ctx, tempDir+"/"+policy, chainID)
+		mounts, err = s.View(ctx, tempDir+"?"+policy, chainID)
 		if err != nil {
 			return nil, nil, nil, err
 		}
