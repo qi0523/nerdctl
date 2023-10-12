@@ -171,6 +171,7 @@ func generateMountOpts(cmd *cobra.Command, ctx context.Context, client *containe
 			return nil, nil, nil, err
 		}
 
+		logrus.Info("p2p-policy", policy)
 		var mounts []mount.Mount
 		mounts, err = s.View(ctx, tempDir+"?"+policy, chainID)
 		if err != nil {
